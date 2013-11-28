@@ -18,7 +18,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
     }
 
     public function teardown() {
-        //$this->repo->connection->flushdb();
+        $this->repo->connection->flushdb();
     }
 
     /**
