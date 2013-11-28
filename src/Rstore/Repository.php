@@ -1,6 +1,6 @@
 <?php
 
-namespace Wallhack;
+namespace Rstore;
 
 use Predis\Client,
     stdClass;

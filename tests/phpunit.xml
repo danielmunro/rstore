@@ -1,7 +1,7 @@
 <phpunit bootstrap="bootstrap.php">
     <testsuites>
         <testsuite name="Repository">
-            <file>src/Wallhack/Repository.php</file>
+            <file>src/Rstore/Repository.php</file>
         </testsuite>
     </testsuites>
     <logging>

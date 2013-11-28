@@ -1,6 +1,6 @@
 <?php
 
-namespace Wallhack\Exception;
+namespace Rstore\Exception;
 
 use Exception;
 

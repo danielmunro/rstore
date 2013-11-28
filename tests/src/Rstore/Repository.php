@@ -1,6 +1,6 @@
 <?php
 
-use Wallhack\Repository,
+use Rstore\Repository,
     Predis\Client;
 
 class RepositoryTest extends PHPUnit_Framework_TestCase {
@@ -22,7 +22,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException Wallhack\Exception\ModelNotFound
+     * @expectedException Rstore\Exception\ModelNotFound
      */
     public function testCreate() {
         $user = $this->repo->create('user');
