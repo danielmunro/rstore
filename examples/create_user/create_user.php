@@ -16,7 +16,7 @@ $user = $repo->create('user');
 $user->full_name = "Dan Munro";
 $user->handle = "danmunro";
 $user->email = "dan@danmunro.com";
-$user->age = 26;
+$user->age = 100;
 
 $user->articles = array(
     $repo->create('article'),
@@ -30,6 +30,3 @@ $repo->save($user);
 $user = $repo->loadByIndex('user', 'id', $user->id);
 
 var_dump($user);
-var_dump($user->articles);
-
-die;
