@@ -9,7 +9,7 @@ $client = new Predis\Client(
     )
 );
 
-$repo = new Wallhack\Repository($client, yaml_parse_file(__DIR__.'/models.yaml'));
+$repo = new Rstore\Repository($client, yaml_parse_file(__DIR__.'/models.yaml'));
 
 $user = $repo->create('user');
 
