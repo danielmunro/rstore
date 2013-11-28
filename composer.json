@@ -1,0 +1,11 @@
+{
+    "require":{
+        "predis/predis": "0.8.*"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": {
+            "Wallhack": "src"
+        }
+    }
+}

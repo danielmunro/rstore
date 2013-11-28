@@ -1,0 +1,33 @@
+article:
+    properties:
+        title:
+            type: string
+            maxlength: 255
+        url:
+            type: string
+            maxlength: 255
+            required: true
+            index: true
+        article:
+            type: string
+        author:
+            type: model
+            ref: user
+            required: true
+
+user:
+    properties:
+        name:
+            type: string
+            maxlength: 128
+        handle:
+            type: string
+            maxlength: 16
+            required: true
+            index: true
+        email:
+            type: string
+            maxlength: 128
+        articles:
+            type: array
+            ref: article
