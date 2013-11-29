@@ -24,19 +24,6 @@ class Repository {
                     $model->$propertyName = $property['default'];
                     continue;
                 }
-                switch($property['type']) {
-                    case 'integer':
-                        $model->$propertyName = 0;
-                        break;
-                    case 'string':
-                        $model->$propertyName = "";
-                        break;
-                    case 'array':
-                        $model->$propertyName = array();
-                        break;
-                    default:
-                        $model->$propertyName = null;
-                }
             }
             $model->created_date = null;
             $model->modified_date = null;
@@ -48,7 +35,7 @@ class Repository {
         } else {
             throw new Exception\ModelNotFound($modelName.' model not found');
         }
-        return $model;
+        return $this->fillModelProperties($model);
     }
 
     public function save(stdClass $model) {
@@ -99,6 +86,7 @@ class Repository {
                 }
                 $result->$property = self::getValueType($value);
             }
+            $result = $this->fillModelProperties($result);
         }
         return $result;
     }
@@ -116,7 +104,7 @@ class Repository {
                     $model->$property = self::getValueType($value);
                 }
             }
-            $results[] = $model;
+            $results[] = $this->fillModelProperties($model);
         }
         return $results;
     }
@@ -129,8 +117,8 @@ class Repository {
 
     protected function validateType($propertyName, $propertyDef, $model) {
         $value = $model->$propertyName;
-        if(isset($propertyDef['required']) && $propertyDef['required'] && !$value) {
-            return false;
+        if($propertyName != 'id' && isset($propertyDef['required']) && $propertyDef['required'] && !$value) {
+            throw new Exception\Validation($propertyName." is required");
         }
         switch($propertyDef['type']) {
             case 'string':
@@ -147,7 +135,7 @@ class Repository {
                 }
                 return true;
             case 'model':
-                if(!is_object($value) || $value->name != $propertyDef['ref']) {
+                if($value && (!is_object($value) || $value->name != $propertyDef['ref'])) {
                     throw new Exception\Validation($propertyName." should be model, is not");
                 }
                 return true;
@@ -175,6 +163,7 @@ class Repository {
         if(sizeof($parts) == 3) {
             return $this->loadByIndex($parts[0], 'id', $parts[2]);
         }
+        throw new Exception\InvalidIdentifier();
     }
 
     protected function getArrayFromIdentifier($identifier) {
@@ -195,6 +184,28 @@ class Repository {
 
     protected function getNewID($modelName) {
         return $this->connection->hincrby('auto_increment', $modelName, '1');
+    }
+
+    private function fillModelProperties(stdClass $model) {
+        foreach($this->models[$model->name]['properties'] as $property => $value) {
+            if(!isset($model->$property)) {
+                $type = $this->models[$model->name]['properties'][$property]['type'];
+                switch($type) {
+                    case 'integer':
+                        $model->$property = 0;
+                        break;
+                    case 'string':
+                        $model->$property = "";
+                        break;
+                    case 'array':
+                        $model->$property = array();
+                        break;
+                    default:
+                        $model->$property = null;
+                }
+            }
+        }
+        return $model;
     }
 
     private static function getValueType($value) {

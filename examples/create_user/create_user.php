@@ -27,6 +27,6 @@ $user->articles = array(
 
 $repo->save($user);
 
-$user = $repo->loadByIndex('user', 'id', $user->id);
+$loadedUser = $repo->loadByIndex('user', 'id', $user->id);
 
-var_dump($user);
+var_dump($loadedUser);

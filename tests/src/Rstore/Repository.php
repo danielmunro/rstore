@@ -25,7 +25,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
      * @expectedException Rstore\Exception\ModelNotFound
      */
     public function testCreate() {
-        $user = $this->repo->create('user');
+        $user = $this->repo->create('user', array('handle' => 'anon'));
         $this->assertInstanceOf('stdClass', $user);
 
         $this->assertTrue(is_numeric($user->age));
@@ -43,7 +43,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testPersist() {
-        $user = $this->repo->create('user');
+        $user = $this->repo->create('user', array('handle' => 'anon'));
         $user->articles = array(
             $this->repo->create('article', array(
                 'url' => '/test-article-1',
@@ -67,5 +67,42 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
 
         $loadedUser = $this->repo->loadByIndex('user', 'id', $user->id);
         $this->assertEquals($user, $loadedUser);
+    }
+
+    public function testLoad() {
+        $user1 = $this->repo->create('user', array('handle' => 'anon1'));
+        $user1->articles = array(
+            $this->repo->create('article', array(
+                'url' => '/test-article-1',
+                'article' => 'test 1'
+            )),
+            $this->repo->create('article', array(
+                'url' => '/test-article-2',
+                'article' => 'test 2'
+            )),
+        );
+
+        $user1->favorite_article = $this->repo->create('article', array('url' => '/test-article-3'));
+
+        $this->repo->save($user1);
+
+        $user2 = $this->repo->create('user', array('handle' => 'anon2'));
+
+        $this->repo->save($user2);
+
+        $users = $this->repo->load('user', 0, 1);
+        $this->assertEquals(2, sizeof($users));
+        $this->assertEquals($user1, $users[0]);
+        $this->assertEquals($user2, $users[1]);
+    }
+
+    /**
+     * @expectedException Rstore\Exception\InvalidIdentifier
+     */
+    public function testGetModelFromIdentifier() {
+        $this->assertEquals(null, $this->repo->loadByIndex('foo', 'id', '0'));
+        $method = new ReflectionMethod($this->repo, 'getModelFromIdentifier');
+        $method->setAccessible(true);
+        $method->invokeArgs($this->repo, array('not_valid_identifier'));
     }
 }
