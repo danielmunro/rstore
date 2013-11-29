@@ -19,7 +19,7 @@ class Repository {
         $model = null;
         if(isset($this->models[$modelName])) {
             $model = new stdClass();
-            foreach($this->models[$modelName]['properties'] as $propertyName => $property) {
+            foreach($this->models[$modelName] as $propertyName => $property) {
                 if(isset($property['default'])) {
                     $model->$propertyName = $property['default'];
                     continue;
@@ -66,7 +66,7 @@ class Repository {
                 $this->connection->hset($model->name.':'.$model->id, $property, $value);
             }
         }
-        foreach($this->models[$model->name]['properties'] as $propertyName => $property) {
+        foreach($this->models[$model->name] as $propertyName => $property) {
             if(isset($property['index']) && $property['index']) {
                 $this->connection->hset($model->name.':'.$propertyName, $model->$propertyName, $model->id);
             }
@@ -110,15 +110,26 @@ class Repository {
     }
 
     public function validate(stdClass $model) {
-        foreach($this->models[$model->name]['properties'] as $propertyName => $property) {
+        foreach($this->models[$model->name] as $propertyName => $property) {
             $this->validateType($propertyName, $property, $model);
         }
     }
 
     protected function validateType($propertyName, $propertyDef, $model) {
         $value = $model->$propertyName;
-        if($propertyName != 'id' && isset($propertyDef['required']) && $propertyDef['required'] && !$value) {
-            throw new Exception\Validation($propertyName." is required");
+        if($propertyName != 'id' && !$value) {
+            if(self::propertyIs($propertyDef, 'required')) {
+                throw new Exception\Validation($propertyName." is required");
+            }
+            if(self::propertyIs($propertyDef, 'index')) {
+                throw new Exception\Validation($propertyName." is required");
+            }
+        }
+        if($value && (self::propertyIs($propertyDef, 'unique') || self::propertyIs($propertyDef, 'index'))) {
+            $result = $this->loadByIndex($model->name, $propertyName, $value);
+            if($result && $value != $result->id) {
+                throw new Exception\Validation($propertyName." must be unique.");
+            }
         }
         switch($propertyDef['type']) {
             case 'string':
@@ -187,9 +198,9 @@ class Repository {
     }
 
     private function fillModelProperties(stdClass $model) {
-        foreach($this->models[$model->name]['properties'] as $property => $value) {
+        foreach($this->models[$model->name] as $property => $value) {
             if(!isset($model->$property)) {
-                $type = $this->models[$model->name]['properties'][$property]['type'];
+                $type = $this->models[$model->name][$property]['type'];
                 switch($type) {
                     case 'integer':
                         $model->$property = 0;
@@ -206,6 +217,10 @@ class Repository {
             }
         }
         return $model;
+    }
+
+    private static function propertyIs($propertyDef, $propertyKey) {
+        return isset($propertyDef[$propertyKey]) ? $propertyDef[$propertyKey] : false;
     }
 
     private static function getValueType($value) {

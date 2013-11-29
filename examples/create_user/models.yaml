@@ -1,43 +1,33 @@
 user:
-    properties:
-        id:
-            type: integer
-            required: true
-            index: true
-        full_name:
-            type: string
-            maxlength: 128
-        handle:
-            type: string
-            maxlength: 16
-            required: true
-            index: true
-        email:
-            type: string
-            maxlength: 128
-        articles:
-            type: array
-            ref: article
-        age:
-            type: integer
+    id:
+        type: integer
+        index: true
+    full_name:
+        type: string
+        maxlength: 128
+    handle:
+        type: string
+        maxlength: 16
+        index: true
+    email:
+        type: string
+        maxlength: 128
+    articles:
+        type: array
+        ref: article
+    age:
+        type: integer
 
 article:
-    properties:
-        id:
-            type: integer
-            required: true
-            index: true
-        title:
-            type: string
-            maxlength: 255
-        url:
-            type: string
-            maxlength: 255
-            required: true
-            index: true
-        article:
-            type: string
-        author:
-            type: model
-            ref: user
-            required: true
+    id:
+        type: integer
+        index: true
+    title:
+        type: string
+        maxlength: 255
+    url:
+        type: string
+        maxlength: 255
+        index: true
+    article:
+        type: string

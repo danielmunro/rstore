@@ -10,7 +10,8 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
             new Client(
                 array(
                     'host' => '127.0.0.1',
-                    'port' => 6379
+                    'port' => 6379,
+                    'db' => '12'
                 )
             ),
             yaml_parse_file(__DIR__.'/../../config/models.yaml')
