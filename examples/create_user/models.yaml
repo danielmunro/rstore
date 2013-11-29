@@ -9,9 +9,8 @@ user:
         type: string
         maxlength: 16
         index: true
-    email:
-        type: string
-        maxlength: 128
+    email_addresses:
+        type: array
     articles:
         type: array
         ref: article

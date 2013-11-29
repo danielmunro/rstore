@@ -41,6 +41,8 @@ $user->articles = array(
 
 $repo->save($user);
 
-$loadedUser = $repo->loadByIndex('user', 'id', $user->id);
+$userLoadedByID = $repo->loadByIndex('user', 'id', $user->id);
+$userLoadedByHandle = $repo->loadByIndex('user', 'handle', $user->handle);
 
-echo ($user == $loadedUser).PHP_EOL;
+echo ($user == $userLoadedByID).PHP_EOL;
+echo ($user == $userLoadedByHandle).PHP_EOL;
