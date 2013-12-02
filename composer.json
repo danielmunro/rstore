@@ -1,4 +1,11 @@
 {
+    "name": "danielmunro/rstore",
+    "description": "A PHP library for storing and retrieving data structures with redis.",
+    "keywords": ["php", "redis", "library"],
+    "authors":[{
+        "name":"Dan Munro",
+        "email":"dan@danmunro.com"
+    }],
     "require":{
         "predis/predis": "0.8.*"
     },
