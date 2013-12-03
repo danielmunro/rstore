@@ -109,6 +109,13 @@ class Repository {
         return $results;
     }
 
+    public function loadReverse($modelName, $start, $limit) {
+        $len = $this->connection->llen($modelName) - 1;
+        $newStart = $len - $limit;
+        $newLimit = $len - $start;
+        return array_reverse($this->load($modelName, $newStart, $newLimit));
+    }
+
     public function validate(stdClass $model) {
         foreach($this->models[$model->name] as $propertyName => $property) {
             $this->validateType($propertyName, $property, $model);
@@ -127,7 +134,7 @@ class Repository {
         }
         if($value && (self::propertyIs($propertyDef, 'unique') || self::propertyIs($propertyDef, 'index'))) {
             $result = $this->loadByIndex($model->name, $propertyName, $value);
-            if($result && $value != $result->id) {
+            if($result && $result->id != $result->id) {
                 throw new Exception\Validation($propertyName." must be unique.");
             }
         }
