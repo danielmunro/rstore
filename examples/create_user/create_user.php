@@ -10,7 +10,8 @@ $client = new Predis\Client(
     )
 );
 
-$client->flushdb();
+// for safety, comment this out
+//$client->flushdb();
 
 $repo = new Rstore\Repository($client, yaml_parse_file(__DIR__.'/models.yaml'));
 
