@@ -1,7 +1,7 @@
 rstore
 ========
 
-A simple redis-backed repository for php
+A simple redis-backed repository for php.
 
 usage
 -----
@@ -57,3 +57,8 @@ $loadedUser = $repo->loadByIndex('user', 'id', $user->id);
 
 echo $loadedUser == $user; // true
 ```
+
+Generated docs
+--------------
+
+http://rstore-docs.danmunro.com/
