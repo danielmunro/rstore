@@ -18,9 +18,7 @@ $client = new Predis\Client(
     )
 );
 
-$repo = new Rstore\Repository(
-    $client,
-    yaml_parse(
+$models = yaml_parse(
 "user:
     id:
         type: integer
@@ -38,8 +36,11 @@ $repo = new Rstore\Repository(
     email_addresses:
         type: array
     bio:
-        type: string"
-    )
+        type: string");
+
+$repo = new Rstore\Repository(
+    $client,
+    $models
 );
 
 $user = $repo->create('user');
