@@ -1,20 +1,60 @@
 <?php
 
+/**
+ * This file is part of the rstore package.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Rstore;
 
 use Predis\Client,
     stdClass;
 
+/**
+ * Repository stores and retrieves models from redis.
+ *
+ * @author Dan Munro <dan @ danmunro.com>
+ */
+
 class Repository {
 
-    public $connection = null;
+    /**
+     * @var \Predis\Client $connection A client connection to redis.
+     */
+    protected $connection = null;
+
+    /**
+     * @var array $models An array representing models and their descriptions,
+     * this is akin to table definitions in relational databases.
+     */
     protected $models = array();
 
+    /**
+     * Constructor. Sets the connection and models properties.
+     *
+     * @param \Predis\Client $connection A client connection to redis.
+     * @param array $models An array of models.
+     */
     public function __construct(Client $connection, $models) {
         $this->connection = $connection;
         $this->models = $models;
     }
 
+    /**
+     * Creates a named model from the known definitions and optionally assigns
+     * properties to the new object.
+     *
+     * @param string $modelName The name of the model to create.
+     * @param array $properties Key-value pairs of properties to assign to the
+     * newly created model.
+     *
+     * @throws Exception\ModelNotFound ModelNotFound will be thrown if the provided model name is not found
+     * in the model definitions for the repository.
+     *
+     * @return \stdClass A model.
+     */
     public function create($modelName, $properties = array()) {
         $model = null;
         if(isset($this->models[$modelName])) {
@@ -38,6 +78,16 @@ class Repository {
         return $this->fillModelProperties($model);
     }
 
+    /**
+     * Validates a given model against the model definition and saves it to redis.
+     *
+     * @throws Exception\Validation A validation exception will be thrown if the 
+     * provided model does not match its repository definition.
+     *
+     * @param \stdClass $model A model.
+     *
+     * @return void
+     */
     public function save(stdClass $model) {
         $this->validate($model);
         if(!$model->created_date) {
@@ -73,6 +123,15 @@ class Repository {
         }
     }
 
+    /**
+     * Loads a named model by the given index.
+     *
+     * @param string $modelName Name of the model to load.
+     * @param string $index Index to use when looking for the model.
+     * @param mixed $value Value of the index to look up.
+     *
+     * @return \stdClass $model Found model, or null.
+     */
     public function loadByIndex($modelName, $index, $value) {
         $id = $this->connection->hget($modelName.':'.$index, $value);
         $result = null;
@@ -91,9 +150,18 @@ class Repository {
         return $result;
     }
 
-    public function load($modelName, $start, $limit) {
+    /**
+     * Loads an array of named models by insertion date.
+     *
+     * @param string $modelName Name of the model to load.
+     * @param int $start The start offset for loading models.
+     * @param int $stop The stop offset for loading models.
+     *
+     * @return array Named models matching the given range.
+     */
+    public function load($modelName, $start, $stop) {
         $results = array();
-        foreach($this->connection->lrange($modelName, $start, $limit) as $modelID) {
+        foreach($this->connection->lrange($modelName, $start, $stop) as $modelID) {
             $model = new stdClass();
             foreach($this->connection->hgetall($modelName.':'.$modelID) as $property => $value) {
                 if(strpos($value, ':model:') !== false) {
@@ -109,19 +177,34 @@ class Repository {
         return $results;
     }
 
-    public function loadReverse($modelName, $start, $limit) {
+    /**
+     * Loads an array of named models by reverse order of insertion date.
+     *
+     * @param string $modelName Name of the model to load.
+     * @param int $start The start offset for loading models.
+     * @param int $stop The stop offset for loading models.
+     *
+     * @return array Named models matching the given range.
+     */
+    public function loadReverse($modelName, $start, $stop) {
         $len = $this->connection->llen($modelName) - 1;
-        $newStart = $len - $limit;
-        $newLimit = $len - $start;
-        return array_reverse($this->load($modelName, $newStart, $newLimit));
+        $newStart = $len - $stop;
+        $newStop = $len - $start;
+        return array_reverse($this->load($modelName, $newStart, $newStop));
     }
 
-    public function validate(stdClass $model) {
+    /**
+     * @protected
+     */
+    protected function validate(stdClass $model) {
         foreach($this->models[$model->name] as $propertyName => $property) {
             $this->validateType($propertyName, $property, $model);
         }
     }
 
+    /**
+     * @protected
+     */
     protected function validateType($propertyName, $propertyDef, $model) {
         $value = $model->$propertyName;
         if($propertyName != 'id' && !$value) {
@@ -176,6 +259,9 @@ class Repository {
         }
     }
 
+    /**
+     * @protected
+     */
     protected function getModelFromIdentifier($identifier) {
         $parts = explode(':', $identifier);
         if(sizeof($parts) == 3) {
@@ -184,6 +270,9 @@ class Repository {
         throw new Exception\InvalidIdentifier();
     }
 
+    /**
+     * @protected
+     */
     protected function getArrayFromIdentifier($identifier) {
         $parts = explode(':', $identifier);
         $results = array();
@@ -200,10 +289,16 @@ class Repository {
         return $results;
     }
 
+    /**
+     * @protected
+     */
     protected function getNewID($modelName) {
         return $this->connection->hincrby('auto_increment', $modelName, '1');
     }
 
+    /**
+     * @private
+     */
     private function fillModelProperties(stdClass $model) {
         foreach($this->models[$model->name] as $property => $value) {
             if(!isset($model->$property)) {
@@ -226,10 +321,16 @@ class Repository {
         return $model;
     }
 
+    /**
+     * @private
+     */
     private static function propertyIs($propertyDef, $propertyKey) {
         return isset($propertyDef[$propertyKey]) ? $propertyDef[$propertyKey] : false;
     }
 
+    /**
+     * @private
+     */
     private static function getValueType($value) {
         if(is_numeric($value)) {
             return (int)$value;

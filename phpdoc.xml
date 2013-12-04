@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdoc>
+    <parser>
+        <target>public/docs</target>
+    </parser>
+    <transformer>
+        <target>public/docs</target>
+    </transformer>
+    <files>
+        <file>src/Rstore/Repository.php</file>
+    </files>
+    <transformations>
+        <!-- <template name="new-black" /> -->
+    </transformations>
+</phpdoc>
