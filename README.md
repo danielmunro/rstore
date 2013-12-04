@@ -38,10 +38,7 @@ $models = yaml_parse(
     bio:
         type: string");
 
-$repo = new Rstore\Repository(
-    $client,
-    $models
-);
+$repo = new Rstore\Repository($client, $models);
 
 $user = $repo->create('user');
 $user->full_name = "John Doe";
