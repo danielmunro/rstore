@@ -58,7 +58,7 @@ $loadedUser = $repo->loadByIndex('user', 'id', $user->id);
 echo $loadedUser == $user; // true
 ```
 
-Generated docs
+generated docs
 --------------
 
 http://rstore-docs.danmunro.com/
