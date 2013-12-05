@@ -11,12 +11,14 @@ usage
 
 require_once 'vendor/autoload.php';
 
-$client = new Predis\Client(
+$connection = new Predis\Client(
     array(
         'host' => '127.0.0.1',
         'port' => '6379'
     )
 );
+
+$adapter = new Rstore\ConnectionAdapter\Predis($connection);
 
 $models = yaml_parse(
 "user:
@@ -38,7 +40,7 @@ $models = yaml_parse(
     bio:
         type: string");
 
-$repo = new Rstore\Repository($client, $models);
+$repo = new Rstore\Repository($adapter, $models);
 
 $user = $repo->create('user');
 $user->full_name = "John Doe";
