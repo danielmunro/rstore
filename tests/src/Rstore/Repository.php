@@ -1,25 +1,26 @@
 <?php
 
 use Rstore\Repository,
-    Predis\Client;
+    Rstore\ConnectionAdapter\Predis;
 
 class RepositoryTest extends PHPUnit_Framework_TestCase {
 
     public function setUp() {
+        $this->connection = new Predis(
+            array(
+                'host' => '127.0.0.1',
+                'port' => 6379,
+                'db' => '12'
+            )
+        );
         $this->repo = new Repository(
-            new Client(
-                array(
-                    'host' => '127.0.0.1',
-                    'port' => 6379,
-                    'db' => '12'
-                )
-            ),
+            $this->connection,
             yaml_parse_file(__DIR__.'/../../config/models.yaml')
         );
     }
 
     public function teardown() {
-        $this->repo->connection->flushdb();
+        $this->connection->flushdb();
     }
 
     /**

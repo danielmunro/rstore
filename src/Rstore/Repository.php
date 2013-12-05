@@ -9,8 +9,7 @@
 
 namespace Rstore;
 
-use Predis\Client,
-    stdClass;
+use stdClass;
 
 /**
  * Repository stores and retrieves models from redis.
@@ -21,7 +20,7 @@ use Predis\Client,
 class Repository {
 
     /**
-     * @var \Predis\Client $connection A client connection to redis.
+     * @var \Rstore\Connection $connection A client connection to redis.
      */
     protected $connection = null;
 
@@ -34,10 +33,10 @@ class Repository {
     /**
      * Constructor. Sets the connection and models properties.
      *
-     * @param \Predis\Client $connection A client connection to redis.
+     * @param \Rstore\Connection $connection A client connection to redis.
      * @param array $models An array of models.
      */
-    public function __construct(Client $connection, $models) {
+    public function __construct(Connection $connection, $models) {
         $this->connection = $connection;
         $this->models = $models;
     }
