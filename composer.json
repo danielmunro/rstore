@@ -6,13 +6,13 @@
         "name":"Dan Munro",
         "email":"dan@danmunro.com"
     }],
-    "require":{
-        "predis/predis": "0.8.*"
-    },
     "minimum-stability": "dev",
     "autoload": {
         "psr-0": {
             "Rstore": "src"
         }
+    },
+    "suggest": {
+        "predis/predis": "Optional supported redis client."
     }
 }
