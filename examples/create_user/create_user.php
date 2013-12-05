@@ -2,6 +2,7 @@
 
 require_once __DIR__.'/../../vendor/autoload.php';
 
+/**
 $connection = new Rstore\ConnectionAdapter\Predis(
     array(
         'host' => '127.0.0.1',
@@ -9,6 +10,10 @@ $connection = new Rstore\ConnectionAdapter\Predis(
         'database' => '11'
     )
 );
+ */
+
+$connection = new Rstore\ConnectionAdapter\Phpredis('127.0.0.1', 6379);
+$connection->select(11);
 
 // for safety, comment this out
 //$client->flushdb();
