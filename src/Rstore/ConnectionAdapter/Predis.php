@@ -9,8 +9,8 @@ class Predis implements Connection {
 
     protected $connection = null;
 
-    public function __construct($parameters = null, $options = null) {
-        $this->connection = new Client($parameters, $options);
+    public function __construct(Client $connection) {
+        $this->connection = $connection;
     }
 
     public function rpush($key, $value) {

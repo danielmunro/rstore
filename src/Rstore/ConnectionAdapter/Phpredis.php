@@ -9,9 +9,8 @@ class Phpredis implements Connection {
 
     protected $connection = null;
 
-    public function __construct($host = null, $port = null, $timeout = null, $reserved = null) {
-        $this->connection = new Redis();
-        $this->connection->connect($host, $port, $timeout, $reserved);
+    public function __construct(Redis $connection) {
+        $this->connection = $connection;
     }
 
     public function rpush($key, $value) {

@@ -3,22 +3,25 @@
 require_once __DIR__.'/../../vendor/autoload.php';
 
 /**
-$connection = new Rstore\ConnectionAdapter\Predis(
+$connection = new Predis\Client(
     array(
         'host' => '127.0.0.1',
         'port' => 6379,
         'database' => '11'
     )
 );
+$adapter = new Rstore\ConnectionAdapter\Predis($connection);
  */
 
-$connection = new Rstore\ConnectionAdapter\Phpredis('127.0.0.1', 6379);
+$connection = new Redis();
+$connection->connect('127.0.0.1', 6379);
 $connection->select(11);
+$adapter = new Rstore\ConnectionAdapter\Phpredis($connection);
 
 // for safety, comment this out
 //$client->flushdb();
 
-$repo = new Rstore\Repository($connection, yaml_parse_file(__DIR__.'/models.yaml'));
+$repo = new Rstore\Repository($adapter, yaml_parse_file(__DIR__.'/models.yaml'));
 
 $user = $repo->create('user', array(
     'full_name' => 'John Doe',
