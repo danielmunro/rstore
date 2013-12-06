@@ -109,8 +109,8 @@ class Repository {
                     } else {
                         $this->connection->rpush($model->id.':list:'.$property, $v);
                     }
-                    $this->connection->hset($model->name.':'.$model->id, $property, $model->id.':list:'.$property);
                 }
+                $this->connection->hset($model->name.':'.$model->id, $property, $model->id.':list:'.$property);
             } else {
                 $this->connection->hset($model->name.':'.$model->id, $property, $value);
             }
