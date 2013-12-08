@@ -1,0 +1,16 @@
+tracking_event:
+    id:
+        type: integer
+        index: true
+    ip_address:
+        type: string
+    referrer:
+        type: string
+    affiliate_codes:
+        type: model
+        ref: affiliate_codes
+
+affiliate_codes:
+    id:
+        type: integer
+        index: true
