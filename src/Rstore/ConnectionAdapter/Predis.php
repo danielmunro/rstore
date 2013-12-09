@@ -37,8 +37,8 @@ class Predis implements Connection {
         return $this->connection->lrange($list, $start, $stop);
     }
 
-    public function llen($list, $start, $stop) {
-        return $this->connection->llen($list, $start, $stop);
+    public function llen($list) {
+        return $this->connection->llen($list);
     }
 
     public function flushdb() {

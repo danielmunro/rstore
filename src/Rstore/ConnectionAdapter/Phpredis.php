@@ -37,8 +37,8 @@ class Phpredis implements Connection {
         return $this->connection->lRange($list, $start, $stop);
     }
 
-    public function llen($list, $start, $stop) {
-        return $this->connection->lLen($list, $start, $stop);
+    public function llen($list) {
+        return $this->connection->lLen($list);
     }
 
     public function flushdb() {

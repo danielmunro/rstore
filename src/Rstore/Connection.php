@@ -29,7 +29,7 @@ interface Connection {
 
     public function lrange($list, $start, $stop);
 
-    public function llen($list, $start, $stop);
+    public function llen($list);
 
     public function flushdb();
 }
