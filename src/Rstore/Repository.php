@@ -95,8 +95,8 @@ class Repository {
         $model->modified_date = time();
         if(!$model->id) {
             $model->id = $this->getNewID($model->name);
+            $this->connection->rpush($model->name, $model->id);
         }
-        $this->connection->rpush($model->name, $model->id);
         foreach($model as $property => $value) {
             if(is_object($value)) {
                 $this->save($value);
@@ -186,9 +186,12 @@ class Repository {
      * @return array Named models matching the given range.
      */
     public function loadReverse($modelName, $start, $stop) {
-        $len = $this->connection->llen($modelName) - 1;
+        $len = $this->connection->llen($modelName);
+        if($stop === -1) {
+            $stop = $len;
+        }
         $newStart = $len - $stop;
-        $newStop = $len - $start;
+        $newStop = $len - $start - 1;
         return array_reverse($this->load($modelName, $newStart, $newStop));
     }
 
