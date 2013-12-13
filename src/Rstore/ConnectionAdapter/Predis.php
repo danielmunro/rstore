@@ -41,6 +41,18 @@ class Predis implements Connection {
         return $this->connection->llen($list);
     }
 
+    public function zadd($set, $score, $key) {
+        return $this->connection->zadd($set, $score, $key);
+    }
+
+    public function zrange($set, $start, $stop) {
+        return $this->connection->zrange($set, $start, $stop);
+    }
+
+    public function zrevrange($set, $start, $stop) {
+        return $this->connection->zrevrange($set, $start, $stop);
+    }
+
     public function flushdb() {
         return $this->connection->flushdb();
     }

@@ -119,6 +119,9 @@ class Repository {
             if(isset($property['index']) && $property['index']) {
                 $this->connection->hset($model->name.':'.$propertyName, $model->$propertyName, $model->id);
             }
+            if(isset($property['sort']) && $property['sort']) {
+                $this->connection->zadd($model->name.':'.$propertyName, self::getScore($property['type'], $model->$propertyName), $model->id);
+            }
         }
     }
 
@@ -152,7 +155,7 @@ class Repository {
     /**
      * Loads an array of named models by insertion date.
      *
-     * @param string $modelName Name of the model to load.
+     * @param string $modelName Name of the models to load.
      * @param int $start The start offset for loading models.
      * @param int $stop The stop offset for loading models.
      *
@@ -179,7 +182,7 @@ class Repository {
     /**
      * Loads an array of named models by reverse order of insertion date.
      *
-     * @param string $modelName Name of the model to load.
+     * @param string $modelName Name of the models to load.
      * @param int $start The start offset for loading models.
      * @param int $stop The stop offset for loading models.
      *
@@ -193,6 +196,35 @@ class Repository {
         $newStart = $len - $stop;
         $newStop = $len - $start - 1;
         return array_reverse($this->load($modelName, $newStart, $newStop));
+    }
+
+    /**
+     * Loads an array of named models by a specified property and sort
+     * orientation (asc/desc).
+     *
+     * @param string $modelName Name of the models to load.
+     * @param string $propertyName Name of the property to sort the models on.
+     * @param string $direction Ascending sort or descending sort.
+     * @param int $start The index to start at.
+     * @param int $stop The index to stop at.
+     *
+     * @return array An array of sorted models in the range requested.
+     */
+    public function loadBySort($modelName, $propertyName, $direction = 'desc', $start = 0, $stop = -1) {
+        if($direction === 'desc') {
+            $command = 'zrange';
+        } elseif($direction === 'asc') {
+            $command = 'zrevrange';
+        } else {
+            //error
+        }
+
+        $ids = $this->connection->$command($modelName.':'.$propertyName, $start, $stop);
+        $results = array();
+        foreach($ids as $id) {
+            $results[] = $this->loadByIndex($modelName, 'id', $id);
+        }
+        return $results;
     }
 
     /**
@@ -338,6 +370,25 @@ class Repository {
             return (int)$value;
         } else {
             return $value;
+        }
+    }
+
+    /**
+     * @private
+     */
+    private static function getScore($type, $value) {
+        switch($type) {
+            case 'integer':
+                return $value;
+            case 'string':
+                $rank = "0123456789abcdefghijklmnopqrstuvwxyz";
+                $pos = strpos($rank, strtolower(substr($value, 0, 1)));
+                if($pos === false) {
+                    $pos = -1;
+                }
+                return $pos;
+            default:
+                throw new Exception\InvalidScoreType();
         }
     }
 }

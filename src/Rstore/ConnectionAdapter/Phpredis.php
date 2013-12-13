@@ -41,6 +41,18 @@ class Phpredis implements Connection {
         return $this->connection->lLen($list);
     }
 
+    public function zadd($set, $score, $key) {
+        return $this->connection->zAdd($set, $score, $key);
+    }
+
+    public function zrange($set, $start, $stop) {
+        return $this->connection->zRange($set, $start, $stop);
+    }
+
+    public function zrevrange($set, $start, $stop) {
+        return $this->connection->zRevrange($set, $start, $stop);
+    }
+
     public function flushdb() {
         return $this->connection->flushDB();
     }

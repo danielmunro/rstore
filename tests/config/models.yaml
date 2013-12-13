@@ -6,6 +6,7 @@ article:
         default: New article
         type: string
         maxlength: 255
+        sort: true
     url:
         type: string
         maxlength: 255

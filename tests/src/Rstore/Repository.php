@@ -7,21 +7,51 @@ use Rstore\Repository,
 class RepositoryTest extends PHPUnit_Framework_TestCase {
 
     public function setUp() {
-        $this->connection = new Client(
+        /**
+        $connection = new Client(
             array(
                 'host' => '127.0.0.1',
                 'port' => 6379,
                 'db' => '12'
             )
         );
+        $adapter = new PredisAdapter($connection);
+         */
+
+        $connection = new \Redis();
+        $connection->connect('127.0.0.1', 6379);
+        $connection->select(11);
+        $adapter = new Rstore\ConnectionAdapter\Phpredis($connection);
+
+        $this->connection = $connection;
         $this->repo = new Repository(
-            new PredisAdapter($this->connection),
+            $adapter,
             yaml_parse_file(__DIR__.'/../../config/models.yaml')
         );
     }
 
     public function teardown() {
         $this->connection->flushdb();
+    }
+
+    protected function getArticles() {
+        return array(
+            $this->repo->create('article', array(
+                'title' => 'Starting titles with different letters',
+                'url' => '/test-article-1',
+                'article' => 'test 1'
+            )),
+            $this->repo->create('article', array(
+                'title' => 'In order to test sorting',
+                'url' => '/test-article-2',
+                'article' => 'test 2'
+            )),
+            $this->repo->create('article', array(
+                'title' => 'Functionality',
+                'url' => '/test-article-3',
+                'article' => 'test 3'
+            )),
+        );
     }
 
     /**
@@ -47,16 +77,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
 
     public function testPersist() {
         $user = $this->repo->create('user', array('handle' => 'anon'));
-        $user->articles = array(
-            $this->repo->create('article', array(
-                'url' => '/test-article-1',
-                'article' => 'test 1'
-            )),
-            $this->repo->create('article', array(
-                'url' => '/test-article-2',
-                'article' => 'test 2'
-            )),
-        );
+        $user->articles = $this->getArticles();
         $user->favorite_article = $this->repo->create('article', array(
             'url' => '/test-article-3',
             'article' => 'test 3'
@@ -70,6 +91,20 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
 
         $loadedUser = $this->repo->loadByIndex('user', 'id', $user->id);
         $this->assertEquals($user, $loadedUser);
+    }
+
+    public function testSort() {
+        foreach($this->getArticles() as $article) {
+            $this->repo->save($article);
+        }
+        $articles = $this->repo->loadBySort('article', 'title');
+        $this->assertEquals(1, $articles[2]->id);
+        $this->assertEquals(2, $articles[1]->id);
+        $this->assertEquals(3, $articles[0]->id);
+        $articles = $this->repo->loadBySort('article', 'title', 'asc');
+        $this->assertEquals(3, $articles[2]->id);
+        $this->assertEquals(2, $articles[1]->id);
+        $this->assertEquals(1, $articles[0]->id);
     }
 
     public function testLoad() {
